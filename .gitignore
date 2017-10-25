@@ -44,3 +44,23 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 /venv
+
+# Byte-compiled / optimized / DLL files
+*$py.class
+
+#virtenv
+bin/
+include/
+lib/
+local/
+
+#app specific stuff
+app.db
+db_repository/
+.DS_Store
+redis-stable/
+*.log
+feeder/feed.json
+
+
+celerybeat-schedule

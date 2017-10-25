@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% import "macros/form.html" as forms %}
+
+{% block extra_stylesheets %}
+  <link href="https://cdn.datatables.net/1.10.10/css/jquery.dataTables.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/select/1.2.0/css/select.dataTables.min.css" rel="stylesheet">
+  <link href="https://gyrocode.github.io/jquery-datatables-checkboxes/1.0.3/css/dataTables.checkboxes.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+    {% include "modals/form_event_ioc_add.html" %}
+    {% include "modals/form_event_edit.html" %}
+    {% include "modals/form_event_note_add.html" %}
+
+    <script type="text/javascript">
+        $(document).delegate('button :submit', 'click', function(){
+            var indicatorFormErrors = {% if form.errors %}true{% else %}false{% endif %};
+            var eventFormErrors = {% if ev_form.errors %}true{% else %}false{% endif %};
+            var noteFormErrors = {% if nt_form.errors %}true{% else %}false{% endif %};
+            if (indicatorFormErrors) {
+                $('#myModal').modal('show');
+            }
+            if (eventFormErrors) {
+                $('#myEvModal').modal('show');
+            }
+            if (noteFormErrors) {
+                $('#myNoteModal').modal('show');
+            }
+        });
+    </script>
+
+
+
+
+    <div class="row">
+        <div class="col-md-9">
+            <dl class="dl-horizontal">
+                <dt>Name</dt>
+                <dd>{{ event.name }}</dd>
+                <dt>Details</dt>
+                <dd><pre class="pre-scrollable">{{ event.details }}</pre></dd>
+            </dl>
+        </div>
+        <div class="col-md-3">
+            <dl class="dl-horizontal col-md-offset-0">
+                <dt>Created</dt>
+                <dd>{{ event.created.strftime('%Y-%m-%d') }}</dd>
+                <dt>Status</dt>
+                <dd>{{ event.status.name }}</dd>
+                <dt>Confidence</dt>
+                <dd>{{ event.confidence }}</dd>
+                <dt>Source</dt>
+                <dd>{{ event.source.name }}</dd>
+                <dt>TLP</dt>
+                <dd>{{ event.tlp.name }}</dd>
+                <dt>Impact</dt>
+                <dd>{{ event.impact.name }}</dd>
+                <dt>Likelihood</dt>
+                <dd>{{ event.likelihood.name }}</dd>
+            </dl>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">Add Indicator</button>
+        </div>
+        <div class="col-md-3">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myEvModal">Edit Event</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="lead">Associated Indicators</h1>
+            <table id="indicator_table" class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Data</th>
+                        <th>Type</th>
+                        <th>Control</th>
+                        <th>Comment</th>
+                        <th>Enrich</th>
+                        <th>First Seen</th>
+                        <th>Last Seen</th>
+                        <th>Related Event</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myNoteModal">Add Note</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="lead">Analyst Notes</h1>
+                {% for note in event.notes %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">{{ note.created.strftime('%Y-%m-%d %H:%M') }}</h3>
+                        </div>
+                        <div class="panel-body">
+                            {% autoescape false %}
+                                {{ note.details }}
+                            {% endautoescape %}
+                        </div>
+                    </div>
+                {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_javascripts %}
+  <script src="https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/select/1.2.0/js/dataTables.select.min.js"></script>
+  <script src="https://gyrocode.github.io/jquery-datatables-checkboxes/1.0.3/js/dataTables.checkboxes.min.js"></script>
+  <script type="text/javascript" charset="utf-8">
+    $(document).ready(function(){
+        var table = $('#indicator_table').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: "{{ url_for('pending_data', status='approved', event_id=event.id) }}",
+            deferRender: true,
+            searching: true,
+            columnDefs: [ {
+                targets:   8,
+                orderable: false,
+                searchable: false,
+                "data": null,
+                "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+                    var arr = oData[8].split(",");
+                    var links = "";
+                    for (var i=0; i < arr.length; i++) {
+                        links += "<a href='/event/view/" + arr[i] + "'>" + arr[i] + "</a> ";
+                    };
+                    console.log(arr);
+                    $(nTd).html(links);
+                 }
+            },
+             {
+                targets:   0,
+                "data": null,
+                "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+                    var links = "<a href='/indicator/edit/" + oData[0] + "/view'>" + oData[0] + "</a> ";
+                    $(nTd).html(links);
+                 }
+            }],
+            order: [[ 1, 'asc' ]]
+        });
+    });
+
+
+  </script>
+{% endblock %}
