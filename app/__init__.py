@@ -1,13 +1,31 @@
-from flask import Flask
+from flask import Flask, redirect
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
+from flask_bcrypt import Bcrypt
 from celery import Celery
 
 app = Flask(__name__)
 app.config.from_object('config')
 db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "users.login"
 
+from app.models import User
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.filter(User.id == int(user_id)).first()
+
+
+@login_manager.unauthorized_handler
+def unauthorized_callback():
+    return redirect('/login')
 
 from app import views, models
+
 
 if not app.debug:
     import logging
@@ -41,6 +59,3 @@ def create_celery_app(app):
 
     celery.Task = ContextTask
     return celery
-
-
-

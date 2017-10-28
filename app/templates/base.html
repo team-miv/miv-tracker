@@ -1,9 +1,9 @@
 <html>
     <head>
         {% if title %}
-            <title>{{ title }} - OSTIP</title>
+            <title>{{ title }} - Team MIV tracker</title>
         {% else %}
-            <title>Welcome to OSTIP</title>
+            <title>Welcome to MIV tracker</title>
         {% endif %}
         <link rel="stylesheet" href="/static/css/bootstrap.css">
         <link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
@@ -15,7 +15,7 @@
     </head>
 
     <body>
-        <nav class="navbar navbar-inverse">
+        <nav class="navbar navbar-inverse bg-inverse" style="background: -webkit-linear-gradient(#0088ff, #0b1723);">
             <div class="container-fluid">
                 <!-- Brand and toggle get grouped for better mobile display -->
                 <div class="navbar-header">
@@ -23,12 +23,13 @@
                             data-target="#bs-example-navbar-collapse-1">
                         <span class="sr-only">Toggle navigation</span>
                     </button>
-                    <a class="navbar-brand" href="/">OSTIP</a>
+                    <a class="navbar-brand">MIV tracker</a>
                 </div>
 
                 <!-- Collect the nav links, forms, and other content for toggling -->
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                     <ul class="nav navbar-nav">
+                        {% if current_user.is_authenticated %}
                         <li {% if request.path == '/index' or  request.path == '/'%} class="active" {% endif %}>
                             <a href="/index">Home</a>
                         </li>
@@ -50,6 +51,10 @@
                         <li {% if request.path == '/feeds/config/view' %} class="active" {% endif %}>
                             <a href="/feeds/config/view">Feeds</a>
                         </li>
+                        <li><a href="{{ url_for('logout')}}">Logout</a></li>
+                        {% else %}
+                        {% endif %}
+
                     </ul>
                 </div>
                 <!-- /.navbar-collapse -->
@@ -58,10 +63,14 @@
         </nav>
 
         <div class="container-fluid">
-            {% with messages = get_flashed_messages() %}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            <!-- Categories: success (green), info (blue), warning (yellow), danger (red) -->
                 {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-danger" role="alert">{{ message }}</div>
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        {{ message }}
+                        </div>
                     {% endfor %}
                 {% endif %}
             {% endwith %}
@@ -71,7 +80,7 @@
         <footer id="footer">
             <div class="container">
                 <hr>
-                <p class="text-center">OSTIP Example App</p>
+                <p class="text-center">MIV tracker {{config.APP_VERSION}}</p>
             </div>
         </footer>
         {% block extra_javascripts %} {% endblock %}

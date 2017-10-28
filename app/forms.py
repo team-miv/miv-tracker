@@ -4,6 +4,9 @@ from wtforms.validators import DataRequired
 from wtforms.widgets import TextArea, HiddenInput
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from .models import Source, Tlp, Level, Itype, Control, Status, Likelihood, Event, Destination
+from flask_wtf import Form
+from wtforms import StringField, PasswordField
+from wtforms.validators import DataRequired, Length, Email
 
 
 class FeedConfigForm(Form):
@@ -86,3 +89,7 @@ class StatusForm(Form):
 
 class TlpForm(Form):
     name = StringField('Name', validators=[DataRequired()])
+
+class LoginForm(Form):
+    email = StringField('Email', validators=[DataRequired(), Email(), Length(min=6, max=40)], render_kw={"placeholder": "username"})
+    password = PasswordField('Password', validators=[DataRequired()], render_kw={"placeholder": "password"})

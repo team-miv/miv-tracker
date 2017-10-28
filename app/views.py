@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, request, jsonify, json, escape
+from flask import render_template, flash, redirect, request, jsonify, json, escape, url_for
 from sqlalchemy.exc import IntegrityError
 from app import app
 from .forms import EventForm, IndicatorForm, NoteForm, ItypeForm, FeedConfigForm, IndicatorEditForm, MitigationForm
@@ -6,7 +6,9 @@ from feeder.logentry import  ResultsDict
 from .models import Event, Indicator, Itype, Control, Level, Likelihood, Source, Status, Tlp, Note, Mitigation, db
 from .utils import _valid_json, _add_indicators, _correlate, _enrich_data, filter_query
 from .my_datatables import ColumnDT, DataTables
-
+from flask_login import login_required, login_user, current_user, logout_user
+from .models import User
+from .forms import LoginForm
 
 def _count(chain):
     ret = chain.count()
@@ -16,16 +18,53 @@ def _count(chain):
         return chain
 
 
-
-
-
 @app.route('/')
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm(request.form)
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            user = User.query.filter_by(email=form.email.data).first()
+            if user is not None and user.is_correct_password(form.password.data):
+                user.authenticated = True
+                db.session.add(user)
+                db.session.commit()
+                login_user(user)
+                flash('Thanks for logging in, {}'.format(current_user.email), category='success')
+                return redirect(url_for('index'))
+            else:
+                flash('ERROR! Incorrect login credentials.', category='danger')
+        else:
+            flash('ERROR! Incorrect login credentials.',  category='danger')
+    return render_template('login.html', form=form)
+
+@app.route('/logout')
+@login_required
+def logout():
+    form = LoginForm(request.form)
+    user = current_user
+    user.authenticated = False
+    db.session.add(user)
+    db.session.commit()
+    logout_user()
+    flash('Goodbye!', 'info')
+    return render_template('login.html', form=form)
+
+
 @app.route('/index')
+@login_required
 def index():
+    form = LoginForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            return render_template('index.html', title='Home')
+        else:
+            flash('ERROR! All form values must be filled!',  category='danger')
     return render_template('index.html', title='Home')
 
 
 @app.route('/event/add', methods=['GET', 'POST'])
+@login_required
 def event_add():
     form = EventForm()
     form.confidence.choices = [(i, '%s' % i) for i in xrange(0, 100, 5)]
@@ -52,6 +91,7 @@ def event_add():
 
 
 @app.route('/event/view/<int:event_id>', methods=['GET', 'POST'])
+@login_required
 def event_view(event_id):
     def _indicator_add(form):
         res_dict = ResultsDict(form.event_id.data,
@@ -114,6 +154,7 @@ def event_view(event_id):
 
 
 @app.route('/indicator/pending/view', methods=['GET', 'POST'])
+@login_required
 def indicator_pending():
     if request.method == 'POST':
         update_list = [int(i) for i in request.form.getlist('selected')]
@@ -141,6 +182,7 @@ def indicator_pending():
 
 
 @app.route('/indicator/edit/<int:ind_id>/<action>', methods=['GET', 'POST'])
+@login_required
 def indicator_edit(ind_id, action):
     i = Indicator.query.get(ind_id)
     form = IndicatorEditForm(obj=i)
@@ -198,11 +240,13 @@ def indicator_edit(ind_id, action):
 
 
 @app.route('/indicator/search/view', methods=['GET', 'POST'])
+@login_required
 def indicator_search():
     return render_template('indicator_search.html', title='Search Indicators')
 
 
 @app.route('/admin/data_types/<action>', methods=['GET', 'POST'])
+@login_required
 def admin_data_types(action):
     form = ItypeForm()
     print '%s' % request.form
@@ -236,6 +280,7 @@ def admin_data_types(action):
 
 
 @app.route('/admin/table/view', methods=['GET', 'POST'])
+@login_required
 def view_fields():
     fields = {'Impact': [Level.query.all(), 'impact'],
               'Likelihood': [Likelihood.query.all(), 'likelihood'],
@@ -248,6 +293,7 @@ def view_fields():
 
 
 @app.route('/admin/table/<table_name>/<action>', methods=['POST'])
+@login_required
 def view_edit_table(table_name, action):
     objects = {'impact': Level(),
                'likelihood': Likelihood(),
@@ -283,6 +329,7 @@ def view_edit_table(table_name, action):
 
 
 @app.route('/feeds/config/<action>', methods=['GET', 'POST'])
+@login_required
 def feed_config(action):
     with open(app.config.get('FEED_CONFIG')) as F:
         data = F.read()
@@ -357,6 +404,7 @@ def feed_config(action):
 # DataTables Ajax Endpoints
 ###
 @app.route('/indicator/<status>/data/<int:event_id>')
+@login_required
 def pending_data(status, event_id):
     """Return server side data."""
     # defining columns
@@ -398,6 +446,7 @@ def pending_data(status, event_id):
 
 
 @app.route('/event/<status>/data')
+@login_required
 def event_data(status):
     """Return server side data."""
     # defining columns
@@ -433,6 +482,7 @@ def event_data(status):
 # API Calls
 ###
 @app.route('/api/event/add', methods=['POST'])
+@login_required
 def api_event_add():
     req_keys = ('name', 'details', 'confidence', 'source', 'tlp', 'impact', 'likelihood')
 
@@ -469,6 +519,7 @@ def api_event_add():
 
 
 @app.route('/api/indicator/bulk_add', methods=['POST'])
+@login_required
 def indicator_bulk_add():
     req_keys = ('control', 'data_type', 'event_id', 'pending', 'data')
 
@@ -493,6 +544,7 @@ def indicator_bulk_add():
 
 
 @app.route('/api/indicator/get', methods=['POST'])
+@login_required
 def api_indicator_get():
     req_keys = ('conditions',)
     req_keys2 = ('field', 'operator', 'val')
@@ -509,7 +561,6 @@ def api_indicator_get():
             return json.dumps({'results': 'error', 'data': 'Invalid json'})
 
     q = filter_query(Indicator.query.join(Event), pld.get('conditions'))
-
 
 
 @app.errorhandler(404)
