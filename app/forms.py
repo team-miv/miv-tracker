@@ -1,12 +1,10 @@
-from flask_wtf import Form
-from wtforms import StringField, IntegerField, SelectField, BooleanField
-from wtforms.validators import DataRequired
+from wtforms import IntegerField, BooleanField
 from wtforms.widgets import TextArea, HiddenInput
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from .models import Source, Tlp, Level, Itype, Control, Status, Likelihood, Event, Destination
 from flask_wtf import Form
-from wtforms import StringField, PasswordField
-from wtforms.validators import DataRequired, Length, Email
+from wtforms import StringField, PasswordField, SelectField
+from wtforms.validators import DataRequired, Length, Email, EqualTo
 
 
 class FeedConfigForm(Form):
@@ -17,7 +15,6 @@ class FeedConfigForm(Form):
                                   query_factory=lambda: Event.query.join(Source).filter(Source.name == 'Feed'),
                                   get_label='name')
     module = details = StringField('Modules', widget=TextArea(), validators=[DataRequired()])
-
 
 
 class EventForm(Form):
@@ -47,6 +44,7 @@ class IndicatorEditForm(Form):
     enrich_full = StringField('Enrich Details', widget=TextArea())
     update_enrich = BooleanField('Update Enrichment')
 
+
 class MitigationForm(Form):
     mit_id = IntegerField(widget=HiddenInput())
     description = StringField('Description', validators=[DataRequired()])
@@ -54,7 +52,6 @@ class MitigationForm(Form):
     destination = QuerySelectField('Destination', query_factory=lambda: Destination.query, get_label='name')
     pending = BooleanField('Pending')
     active = BooleanField('Active')
-
 
 
 class NoteForm(Form):
@@ -87,9 +84,27 @@ class SourceForm(Form):
 class StatusForm(Form):
     name = StringField('Name', validators=[DataRequired()])
 
+
 class TlpForm(Form):
     name = StringField('Name', validators=[DataRequired()])
+
 
 class LoginForm(Form):
     email = StringField('Email', validators=[DataRequired(), Email(), Length(min=6, max=40)], render_kw={"placeholder": "username"})
     password = PasswordField('Password', validators=[DataRequired()], render_kw={"placeholder": "password"})
+
+
+class RegisterForm(Form):
+    email = StringField('Email', validators=[DataRequired(), Email(), Length(min=6, max=40)])
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=6, max=40)])
+    confirm = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
+    role = SelectField('Role', choices=[('admin', 'Admin User'),
+                                        ('user', 'Standard User')], validators=[DataRequired()])
+
+
+class EmailForm(Form):
+    email = StringField('Email', validators=[DataRequired(), Email(), Length(min=6, max=40)])
+
+
+class PasswordForm(Form):
+    password = PasswordField('Password', validators=[DataRequired()])
