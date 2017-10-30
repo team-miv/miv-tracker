@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+ 
+{% block content %}
+ 
+<div class="user-profile">
+  <div class="page-header">
+    <h2>Email Change</h2>
+  </div>
+ 
+  <h3>Current Email: {{ current_user.email }}</h3>
+  <h3>Please enter your new email:</h3>
+  <form action="{{ url_for('user_email_change') }}" method="POST">
+  {{ form.hidden_tag() }}
+    <dl>
+      {{ form.email}}
+    </dl>
+    <button class="btn btn-sm btn-success" type="submit">Update</button>
+  </form>
+</div>
+ 
+{% endblock %}

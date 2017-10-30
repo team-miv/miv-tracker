@@ -1,14 +1,21 @@
 from flask import render_template, flash, redirect, request, jsonify, json, escape, url_for
 from sqlalchemy.exc import IntegrityError
 from app import app
-from .forms import EventForm, IndicatorForm, NoteForm, ItypeForm, FeedConfigForm, IndicatorEditForm, MitigationForm
-from feeder.logentry import  ResultsDict
-from .models import Event, Indicator, Itype, Control, Level, Likelihood, Source, Status, Tlp, Note, Mitigation, db
+from .forms import EventForm, IndicatorForm, NoteForm, ItypeForm, FeedConfigForm, IndicatorEditForm, MitigationForm, RegisterForm
+from feeder.logentry import ResultsDict
+from .models import Event, Indicator, Itype, Control, Level, Likelihood, Source, Status, Tlp, Note, Mitigation, db, Users
 from .utils import _valid_json, _add_indicators, _correlate, _enrich_data, filter_query
 from .my_datatables import ColumnDT, DataTables
+from flask_admin import Admin
 from flask_login import login_required, login_user, current_user, logout_user
-from .models import User
-from .forms import LoginForm
+from .models import Users, HomeView, UserView
+from .forms import LoginForm, EmailForm, PasswordForm
+
+
+# set up user administration page
+admin = Admin(app, name='MIV tracker', index_view=HomeView())
+admin.add_view(UserView(Users, db.session))
+
 
 def _count(chain):
     ret = chain.count()
@@ -24,19 +31,20 @@ def login():
     form = LoginForm(request.form)
     if request.method == 'POST':
         if form.validate_on_submit():
-            user = User.query.filter_by(email=form.email.data).first()
+            user = Users.query.filter_by(email=form.email.data).first()
             if user is not None and user.is_correct_password(form.password.data):
                 user.authenticated = True
                 db.session.add(user)
                 db.session.commit()
                 login_user(user)
-                flash('Thanks for logging in, {}'.format(current_user.email), category='success')
+                flash('Welcome, {}'.format(current_user.email), category='success')
                 return redirect(url_for('index'))
             else:
                 flash('ERROR! Incorrect login credentials.', category='danger')
         else:
             flash('ERROR! Incorrect login credentials.',  category='danger')
     return render_template('login.html', form=form)
+
 
 @app.route('/logout')
 @login_required
@@ -49,6 +57,69 @@ def logout():
     logout_user()
     flash('Goodbye!', 'info')
     return render_template('login.html', form=form)
+
+
+@app.route('/email_change', methods=["GET", "POST"])
+@login_required
+def user_email_change():
+    form = EmailForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            try:
+                user_check = Users.query.filter_by(email=form.email.data).first()
+                if user_check is None:
+                    user = current_user
+                    user.email = form.email.data
+                    db.session.add(user)
+                    db.session.commit()
+                    flash('Email changed!', 'success')
+                    return redirect(url_for('user_profile'))
+                else:
+                    flash('Sorry, that email already exists!', 'error')
+            except IntegrityError:
+                flash('Error! That email already exists!', 'error')
+    return render_template('email_change.html', form=form)
+
+
+@app.route('/password_change', methods=["GET", "POST"])
+@login_required
+def user_password_change():
+    form = PasswordForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            user = current_user
+            user.password = form.password.data
+            db.session.add(user)
+            db.session.commit()
+            flash('Password has been updated!', 'success')
+            return redirect(url_for('user_profile'))
+
+    return render_template('password_change.html', form=form)
+
+
+@app.route('/register', methods=['GET', 'POST'])
+@login_required
+def register():
+    form = RegisterForm(request.form)
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            try:
+                new_user = Users(form.email.data, form.password.data, form.role.data)
+                new_user.authenticated = False
+                db.session.add(new_user)
+                db.session.commit()
+                flash('User successfully added', 'success')
+                return redirect(url_for('user_profile'))
+            except IntegrityError:
+                db.session.rollback()
+                flash('Error! That email already exists!', 'error')
+    return render_template('register_user.html', form=form)
+
+
+@app.route('/user_profile')
+@login_required
+def user_profile():
+    return render_template('user_profile.html')
 
 
 @app.route('/index')
@@ -176,7 +247,6 @@ def indicator_pending():
         ioc_list = ioc_query.filter(Indicator.id.in_(update_list)).all()
         _correlate(ioc_list)
         return redirect('/indicator/pending/view')
-
 
     return render_template('indicator_pending.html', title='Pending Indicators')
 

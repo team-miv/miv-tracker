@@ -1,0 +1,17 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+
+<div class="container" align="center">
+    <div class="row">
+        <div class="col-sm-10 col-sm-offset-1">
+            <p class="lead">
+                Welcome to the user administration panel.
+            </p>
+            <p>To exit and return to MIV tracker's main interface please click the button below:</p>
+            <a class="btn btn-primary" href="{{ url_for('user_profile') }}"><i
+                    class="glyphicon glyphicon-chevron-left"></i> Exit</a>
+        </div>
+    </div>
+</div>
+
+{% endblock body %}

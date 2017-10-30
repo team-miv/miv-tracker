@@ -1,7 +1,10 @@
-from sqlalchemy.orm import Session
-
 from app import db, bcrypt
 import datetime
+from flask import redirect, url_for
+from flask_admin import expose, AdminIndexView
+from flask_admin.contrib.sqla import ModelView
+from flask_admin.form import SecureForm
+from flask_login import current_user
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.sql import select, func
 
@@ -95,7 +98,6 @@ class Indicator(db.Model):
         self.first_seen = datetime.datetime.utcnow()
         self.last_seen = datetime.datetime.utcnow()
 
-
     def as_dict(self):
         return '%s' % {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
@@ -119,6 +121,7 @@ class Links(db.Model):
 
     def __repr__(self):
         return '<Links %r:%r -> %r:%r>' % (self.event_id, self.indicator_id, self.rel_event_id, self.rel_indicator_id)
+
 
 class Note(db.Model):
     __tablename__ = "note"
@@ -149,7 +152,6 @@ class Mitigation(db.Model):
 
     destination = db.relationship('Destination', foreign_keys=destination_id)
 
-
     def __init__(self, destination_id, ttl, description):
         self.created = datetime.datetime.utcnow()
         self.pending = True
@@ -157,7 +159,6 @@ class Mitigation(db.Model):
         self.destination_id = destination_id
         self.ttl = ttl
         self.description = description
-
 
     def __repr__(self):
         return '<Mitigation %r>' % (self.id)
@@ -244,18 +245,20 @@ class Status(db.Model):
         return '<Status %r>' % (self.name)
 
 
-class User(db.Model):
+class Users(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String, unique=True, nullable=False)
     _password = db.Column(db.Binary(60), nullable=False)
     authenticated = db.Column(db.Boolean, default=False)
+    role = db.Column(db.String, default='user')
 
-    def __init__(self, email, plaintext_password):
+    def __init__(self, email, plaintext_password, role):
         self.email = email
         self.password = plaintext_password
         self.authenticated = False
+        self.role = role
 
     @hybrid_property
     def password(self):
@@ -291,3 +294,48 @@ class User(db.Model):
 
     def __repr__(self):
         return '<User {0}>'.format(self.name)
+
+
+class HomeView(AdminIndexView):
+    """Customised home view for flask-admin administration panel"""
+    form_base_class = SecureForm  # csrf protection
+
+    @expose('/')
+    def index(self):
+        """exposes custom homepage to the user rather than the default one"""
+        return self.render("admin/index.html")
+
+    def inaccessible_callback(self, name, **kwargs):
+        """redirects to login page if user doesn't have access"""
+        return redirect(url_for('index'))
+
+    def is_accessible(self):
+        """defines admin panel access policy"""
+        return current_user.is_authenticated and current_user.role == 'admin'
+
+
+class UserView(ModelView):
+    """Customised user view for flask-admin administration panel"""
+    form_base_class = SecureForm  # csrf protection
+    column_list = ['email', 'role']
+    column_searchable_list = ['email', 'role']
+    column_filters = ['email']
+    column_editable_list = ['email', 'role']
+    page_size = 50
+    can_create = False
+    can_edit = False
+    form_choices = {
+        'role': [
+            ('admin', 'admin'),
+            ('user', 'user')
+        ]
+    }
+
+    def inaccessible_callback(self, name, **kwargs):
+        """redirects to login page if user doesn't have access"""
+        return redirect(url_for('index'))
+
+    def is_accessible(self):
+        """defines admin panel access policy"""
+        return current_user.is_authenticated and current_user.role == 'admin'
+

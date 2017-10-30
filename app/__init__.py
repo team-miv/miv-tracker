@@ -12,12 +12,12 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "users.login"
 
-from app.models import User
+from app.models import Users
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.filter(User.id == int(user_id)).first()
+    return Users.query.filter(Users.id == int(user_id)).first()
 
 
 @login_manager.unauthorized_handler
