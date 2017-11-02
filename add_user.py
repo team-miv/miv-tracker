@@ -20,4 +20,4 @@ try:
     db.session.commit()
     print "SUCCESS: added user - {}".format(args.username)
 except Exception as e:
-    print "ERROR: cannot add user - {}\nSTACKTRACE:\n {}".format(args.username, e)
+    print "ERROR: cannot add user - {}\nERROR:\n {}".format(args.username, e)
