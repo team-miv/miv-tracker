@@ -1,0 +1,20 @@
+<!-- extend from base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="user-registration">
+    <div class="page-header">
+        <h2>Register A New User Account</h2>
+        <form action="{{ url_for('register') }}" method="post">
+            {{ form.hidden_tag() }}
+            <dl>
+                <p>{{ form.email }} email</p>
+                <p>{{ form.password }} password</p>
+                <p>{{ form.confirm }} confirm password</p>
+                <p>{{ form.role }} define user role</p>
+            </dl>
+            <button class="btn btn-sm btn-success" type="submit">Create New Account</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

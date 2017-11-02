@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+ 
+{% block content %}
+ 
+<div class="user-profile">
+    <div class="page-header">
+        <h2>User Profile</h2>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="panel panel-primary">
+                <div class="panel-heading">Email Address</div>
+                <div class="panel-body">{{current_user.email}}</div>
+            </div>
+
+            <div class="panel panel-info">
+                <div class="panel-heading">Account Actions</div>
+                <div class="panel-body"><a href="{{ url_for('user_email_change') }}">Change Email</a></div>
+                <div class="panel-body"><a href="{{ url_for('user_password_change') }}">Change Password</a></div>
+            </div>
+
+            {% if current_user.role == "admin" %}
+            <div class="panel panel-info">
+                <div class="panel-heading">Admin Area</div>
+                <div class="panel-body"><a href="{{ url_for('admin.index') }}">Manage Users</a></div>
+                <div class="panel-body"><a href="{{ url_for('register') }}">Add User</a></div>
+            </div>
+            {% else %}
+            <div class="panel panel-info">
+                <div class="panel-heading">Admin Area</div>
+                <div class="panel-body"><b>You are not authorised to access administration features.</b>
+                    Please contact the system administrator to be added to the administrators user group.
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+ 
+{% endblock %}
