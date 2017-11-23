@@ -1,3 +1,4 @@
+from app import app
 import concurrent.futures
 import datetime
 import itertools
@@ -5,12 +6,6 @@ import lxml
 import lxml.html
 import requests
 from urlparse import urljoin
-
-# returns the following dictionary
-# {'date': datetime.datetime(2017, 11, 22, 0, 0),
-# 'url': 'http://bikner.de/ri.php',
-# 'md5': '8B70219C53F4437DA54864CA7259A994',
-# 'ip': '94.102.219.225'}
 
 
 def fix_url(url):
@@ -51,21 +46,18 @@ def scrape(page, rows_xpath, mapping, next_xpath=None, stop_condition=None):
 
     except requests.ConnectionError:
         # catch connection errors
-        # logger.warning('CONNECTION ERROR: scraping [{}]'.format(str(page)))
-        pass
+        app.logger.warning('connection error: scraping [{}]'.format(str(page)))
 
     except requests.HTTPError:
         # catch htp errors
-        # logger.warning('HTTP ERROR: scraping [{}]'.format(str(page)))
-        pass
+        app.logger.warning('http error: scraping [{}]'.format(str(page)))
 
     except Exception:
         # catch any other exception for debugging purposes
-        # logger.critical("EXCEPTION RAISED: scraping [{}]".format(str(page)))
-        pass
+        app.logger.critical("error: scraping [{}]".format(str(page)))
 
 
-def scrape_sources():
+def get():
     """Function to scrape data from malware sources"""
     return list(itertools.chain(*concurrent.futures.ThreadPoolExecutor(5).map(
         lambda args: scrape(*args),
