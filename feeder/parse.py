@@ -199,7 +199,6 @@ class ParseScrapedData:
                                  indicator=val,
                                  date=None,
                                  description=desc)
-            print utils._add_indicators(res_dict, pld['pending'])  # todo: remove
             app.logger.info('success - added indicator from {}'.format(self.source))
         else:
             app.logger.warning('error: bad json')
@@ -241,11 +240,9 @@ class ParseScrapedData:
             db.session.commit()
             # create event
             self.add_event(self.event_json)
-            # todo: add data
+            # add data
+            self.run()
 
 
 if __name__ == '__main__':
-    # testing
-    from feeder.scrape import get
-    parser = ParseScrapedData('', get(), 'vxvault.net')
-    parser.run()
+    ''''''
