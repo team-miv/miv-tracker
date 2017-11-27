@@ -15,17 +15,16 @@ As prep work on Debian or Ubuntu systems, you will need to run ```sudo apt insta
 
 To install miv-tracker do the following:
 - ```git clone https://github.com/team-miv/miv-tracker.git```
-- ```virtualenv ostip```
-- ```cd ostip```
+- ```virtualenv venv```
+- ```cd venv```
 - ```bin/pip install -r requirements.txt```
-- ```scripts/install-redis.sh```
 - ```./db_create.py```
+- ```./db_populate.py```
 
 To run miv-tracker do the following:
-- ```../redis-stable/src/redis-server``` *Note: this is started in install-redis.sh, but in subsequent runs, it's required.*
-- ```bin/celery -A tasks.celery worker --loglevel=info --beat```
 - ```./add_user -u username -p password``` *Note: run only on first time installations or when needing to add a new user*
 - ```./run.py```
+- ```./tasks.py```
 
 *Note: if not running on localhost, add host=0.0.0.0 to app.run() in run.py, or use* ```./run.py --prod```
 

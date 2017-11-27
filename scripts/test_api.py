@@ -1,8 +1,6 @@
 #!../bin/python
 import requests
 
-
-
 indicator_json = {
   "event_id": 3,
   "control": "Inbound",

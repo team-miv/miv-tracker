@@ -14,4 +14,4 @@ CELERY_BROKER_BACKEND = 'redis://127.0.0.1:6379'
 FEED_CONFIG = os.path.join(basedir, 'feeder/feed.json')
 
 # miscellaneous
-APP_VERSION = "v.1-alpha"
+APP_VERSION = "v.1.0.0-beta"
