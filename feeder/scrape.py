@@ -57,24 +57,10 @@ def scrape(page, rows_xpath, mapping, next_xpath=None, stop_condition=None):
         app.logger.critical("error: scraping [{}]".format(str(page)))
 
 
-def get():
+def scrape_source(config):
     """Function to scrape data from malware sources"""
     return list(itertools.chain(*concurrent.futures.ThreadPoolExecutor(5).map(
-        lambda args: scrape(*args),
-        [(
-            'http://vxvault.net/ViriList.php',
-            "//div[@id='page']/table/tr[td]",
-            {
-                "date": lambda row: datetime.datetime.strptime(
-                    str(datetime.datetime.now().year) + "-" + row[0][0].text,
-                    "%Y-%m-%d"),
-                "url": lambda row: fix_url(row[1][1].text.strip()),
-                "md5": lambda row: row[2][0].text.strip(),
-                "ip": lambda row: row[3][0].text.strip(),
-            },
-            "//a[text()='Next >']/@href",
-            lambda row, item: (datetime.datetime.now() - item["date"]).days > 30
-        )])))
+        lambda args: scrape(*args), config)))
 
 
 if __name__ == '__main__':

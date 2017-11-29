@@ -126,16 +126,23 @@ class ParseText:
 
 
 class ParseScrapedData:
-    def __init__(self, config, data, source):
-        # self.control = config.get('control')
+    def __init__(self, data, source):
         self.data = data
         self.source = source
-        # self.data_types = config.get('data_types', [])
-        self.event_json = {"name": "{} scraping".format(self.source),
-                           "details": "Observables mined from {}".format(self.source),
-                           "confidence": 10, "source": source,
-                           "tlp": "Green",
-                           "impact": "Low", "likelihood": "Low"}
+        if not Event.query.filter(
+                Event.name == "{} scraping".format(self.source)).first():
+            # add source
+            obj = Source()
+            obj.name = self.source
+            db.session.add(obj)
+            db.session.commit()
+            # create event
+            self.add_event({"name": "{} scraping".format(self.source),
+                            "details": "Observables mined from {}".format(
+                                self.source),
+                            "confidence": 10, "source": source,
+                            "tlp": "Green",
+                            "impact": "Low", "likelihood": "Low"})
 
     def get_source_id(self):
         return Event.query.filter(
@@ -199,49 +206,41 @@ class ParseScrapedData:
                                  indicator=val,
                                  date=None,
                                  description=desc)
-            app.logger.info('success - added indicator from {}'.format(self.source))
+            app.logger.info(
+                'success - added indicator from {}'.format(self.source))
         else:
             app.logger.warning('error: bad json')
 
     def run(self):
         app.logger.info("Processing ParseScrapedData")
-        # todo: move this check in init
-        if Event.query.filter(Event.name == self.event_json["name"]).first():
-            for row in self.data:
-                ip_indicator = json.dumps({
-                    "event_id": self.get_source_id(),
-                    "control": "Inbound",
-                    "data_type": "ipv4",
-                    "pending": True,
-                    "data": [[row['ip'],
-                             'malware ip reported by {}'.format(self.source)]]})
-                md5_indicator = json.dumps({
-                    "event_id": self.get_source_id(),
-                    "control": "Inbound",
-                    "data_type": "md5",
-                    "pending": True,
-                    "data": [[row['md5'],
-                              'malware md5 reported by {}'.format(self.source)]]})
-                url_indicator = json.dumps({
-                    "event_id": self.get_source_id(),
-                    "control": "Inbound",
-                    "data_type": "url",
-                    "pending": True,
-                    "data": [[row['url'],
-                              'malware url reported by {}'.format(self.source)]]})
-                self.add_data(ip_indicator)
-                self.add_data(md5_indicator)
-                self.add_data(url_indicator)
-        else:
-            # add source
-            obj = Source()
-            obj.name = self.source
-            db.session.add(obj)
-            db.session.commit()
-            # create event
-            self.add_event(self.event_json)
-            # add data
-            self.run()
+        for row in self.data:
+            ip_indicator = json.dumps({
+                "event_id": self.get_source_id(),
+                "control": "Inbound",
+                "data_type": "ipv4",
+                "pending": True,
+                "data": [[row['ip'],
+                          'malware ip reported by {}'.format(
+                              self.source)]]})
+            md5_indicator = json.dumps({
+                "event_id": self.get_source_id(),
+                "control": "Inbound",
+                "data_type": "md5",
+                "pending": True,
+                "data": [[row['md5'],
+                          'malware md5 reported by {}'.format(
+                              self.source)]]})
+            url_indicator = json.dumps({
+                "event_id": self.get_source_id(),
+                "control": "Inbound",
+                "data_type": "url",
+                "pending": True,
+                "data": [[row['url'],
+                          'malware url reported by {}'.format(
+                              self.source)]]})
+            self.add_data(ip_indicator)
+            self.add_data(md5_indicator)
+            self.add_data(url_indicator)
 
 
 if __name__ == '__main__':
