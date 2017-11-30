@@ -56,7 +56,6 @@ def scrape(page, rows_xpath, mapping, next_xpath=None, stop_condition=None):
         # catch any other exception for debugging purposes
         app.logger.critical("error: scraping [{}]".format(str(page)))
 
-
 def scrape_source(config):
     """Function to scrape data from malware sources"""
     return list(itertools.chain(*concurrent.futures.ThreadPoolExecutor(5).map(
