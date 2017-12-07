@@ -1,3 +1,5 @@
+![alt tag](https://github.com/errantbot/miv-tracker/tree/master/doc/logo.JPG)
+
 ### Overview
 This is the official repository for [team MIV's](https://malwareintel.io/meet-the-team/) malware tracker.
 The tracker can be found [here](http://37.139.17.66:5000/login) and is currently under heavy development.
