@@ -41,4 +41,3 @@ vxvault_config = [('http://vxvault.net/ViriList.php',
 #                     },
 #                    "//a[text()='next']/@href"
 #                    )]
-
