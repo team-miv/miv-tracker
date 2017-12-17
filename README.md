@@ -1,3 +1,5 @@
+![alt tag](https://github.com/errantbot/miv-tracker/blob/dev/doc/logo.JPG)
+
 ### Overview
 This is the official repository for [team MIV's](https://malwareintel.io/meet-the-team/) malware tracker.
 The tracker can be found [here](http://37.139.17.66:5000/login) and is currently under heavy development.
@@ -23,8 +25,9 @@ To install miv-tracker do the following:
 
 To run miv-tracker do the following:
 - ```./add_user -u username -p password``` *Note: run only on first time installations or when needing to add a new user*
+- ```source venv/bin/activate```
 - ```./run.py```
-- ```./tasks.py```
+- ```./tasks.py &```
 
 *Note: if not running on localhost, add host=0.0.0.0 to app.run() in run.py, or use* ```./run.py --prod```
 
