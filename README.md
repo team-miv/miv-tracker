@@ -25,8 +25,9 @@ To install miv-tracker do the following:
 
 To run miv-tracker do the following:
 - ```./add_user -u username -p password``` *Note: run only on first time installations or when needing to add a new user*
+- ```source venv/bin/activate```
 - ```./run.py```
-- ```./tasks.py```
+- ```./tasks.py &```
 
 *Note: if not running on localhost, add host=0.0.0.0 to app.run() in run.py, or use* ```./run.py --prod```
 
