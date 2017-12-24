@@ -13,6 +13,7 @@ defusedxml==0.4.1
 dnspython==1.14.0
 ecdsa==0.13
 Flask==0.11.1
+Flask-Admin==1.5.0
 Flask-Babel==0.11.1
 Flask-Bcrypt==0.7.1
 Flask-Login==0.3.2
