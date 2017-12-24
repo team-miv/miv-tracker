@@ -1,4 +1,4 @@
-![alt tag](https://github.com/errantbot/miv-tracker/blob/dev/doc/logo.JPG)
+![alt tag](https://github.com/team-miv/miv-tracker/blob/master/doc/logo.JPG)
 
 ### Overview
 This is the official repository for [team MIV's](https://malwareintel.io/meet-the-team/) malware tracker.
