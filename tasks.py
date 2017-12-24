@@ -14,7 +14,7 @@ def jobs():
     parser.run()
 
 
-schedule.every().day.at("19:55").do(jobs)
+schedule.every().day.at("15:50").do(jobs)
 
 app.logger.info('scheduler started on {}'.format(datetime.now()))
 while True:

@@ -15,3 +15,4 @@ FEED_CONFIG = os.path.join(basedir, 'feeder/feed.json')
 
 # miscellaneous
 APP_VERSION = "v.1.0.0-beta"
+APP_NAME = "MIV tracker"
