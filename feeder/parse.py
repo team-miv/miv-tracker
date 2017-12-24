@@ -206,6 +206,7 @@ class ParseScrapedData:
                                  indicator=val,
                                  date=None,
                                  description=desc)
+            utils._add_indicators(res_dict, pld['pending'])
             app.logger.info(
                 'success - added indicator from {}'.format(self.source))
         else:

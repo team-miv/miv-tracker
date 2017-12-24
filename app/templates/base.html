@@ -1,9 +1,9 @@
 <html>
     <head>
         {% if title %}
-            <title>{{ title }} - Team MIV tracker</title>
+            <title>{{ title }} - {{config.APP_NAME}}</title>
         {% else %}
-            <title>Welcome to MIV tracker</title>
+            <title>Welcome to {{config.APP_NAME}}</title>
         {% endif %}
         <link rel="stylesheet" href="/static/css/bootstrap.css">
         <link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
@@ -23,7 +23,7 @@
                             data-target="#bs-example-navbar-collapse-1">
                         <span class="sr-only">Toggle navigation</span>
                     </button>
-                    <a class="navbar-brand">MIV tracker</a>
+                    <a class="navbar-brand">{{config.APP_NAME}}</a>
                 </div>
 
                 <!-- Collect the nav links, forms, and other content for toggling -->
@@ -89,7 +89,7 @@
         <footer id="footer">
             <div class="container">
                 <hr>
-                <p class="text-center">MIV tracker {{config.APP_VERSION}}</p>
+                <p class="text-center">{{config.APP_NAME}} {{config.APP_VERSION}}</p>
             </div>
         </footer>
         {% block extra_javascripts %} {% endblock %}
