@@ -23,13 +23,20 @@ To install miv-tracker do the following:
 - ```./db_create.py```
 - ```./db_populate.py```
 
-To run miv-tracker do the following:
-- ```./add_user -u username -p password``` *Note: run only on first time installations or when needing to add a new user*
+To run miv-tracker locally for testing and development purposes do the following:
+- ```./add_user -u username -p password -r admin``` *Note: run only on first time installation, users can later be added through the app's admin panel*
 - ```source venv/bin/activate```
 - ```./run.py```
+
+To run miv-tracker in a production environment run the following:
+- ```./add_user -u username -p password -r admin``` *Note: run only on first time installation*
+- ```source venv/bin/activate```
+- ```pip install gunicorn```
+- ```gunicorn --bind 0.0.0.0:5000 run:app```
 - ```./tasks.py &```
 
-*Note: if not running on localhost, add host=0.0.0.0 to app.run() in run.py, or use* ```./run.py --prod```
+*Note: An optimal production setup would serve miv-tracker via gunicorn behing Nginx
+acting as a front end reverse proxy. Instructions to do so can be found [here](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-16-04).*
 
 ### Versioning
 This project adheres to [Semantic Versioning](http://semver.org/).
