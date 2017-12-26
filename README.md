@@ -20,16 +20,14 @@ To install miv-tracker do the following:
 - ```virtualenv venv```
 - ```cd venv```
 - ```bin/pip install -r requirements.txt```
-- ```./db_create.py```
+- ```./db_create.py``` *Note: on first time installation, you will be asked to supply an administrator username and password*
 - ```./db_populate.py```
 
 To run miv-tracker locally for testing and development purposes do the following:
-- ```./add_user -u username -p password -r admin``` *Note: run only on first time installation, users can later be added through the app's admin panel*
 - ```source venv/bin/activate```
 - ```./run.py```
 
 To run miv-tracker in a production environment run the following:
-- ```./add_user -u username -p password -r admin``` *Note: run only on first time installation*
 - ```source venv/bin/activate```
 - ```pip install gunicorn```
 - ```gunicorn --bind 0.0.0.0:5000 run:app```
