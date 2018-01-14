@@ -2,7 +2,7 @@
 
 ### Overview
 This is the official repository for [team MIV's](https://malwareintel.io/meet-the-team/) malware tracker.
-The tracker can be found [here](https://37.139.17.66:80/) and is currently under heavy development.
+The tracker can be found [here](https://tracker.malwareintel.io/) and is currently under heavy development.
 It is being used to assist with the collection of malware samples from OSINT sources and MIV's
 own honeypot network. It is the intention for the tracker to become a centralised
 repository helping MIV members with malware analysis and information dissemination through
