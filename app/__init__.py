@@ -44,9 +44,6 @@ def unauthorized_callback():
     return redirect('/')
 
 
-from app import views, models
-
-
 if not app.debug:
     import logging
     from logging.handlers import RotatingFileHandler
