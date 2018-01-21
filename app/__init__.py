@@ -22,12 +22,10 @@ app.config["BLOGGING_KEYWORDS"] = ["locky", "malware", "new strain"]
 app.config["FILEUPLOAD_IMG_FOLDER"] = "fileupload"
 app.config["FILEUPLOAD_PREFIX"] = "/fileupload"
 app.config["FILEUPLOAD_ALLOWED_EXTENSIONS"] = ["png", "jpg", "jpeg", "gif"]
-
 engine = create_engine(app.config["SQLALCHEMY_DATABASE_URI"])
 meta = MetaData()
 sql_storage = SQLAStorage(engine, metadata=meta)
 blog_engine = BloggingEngine(app, sql_storage)
-login_manager = LoginManager(app)
 meta.create_all(bind=engine)
 
 from app.models import Users
