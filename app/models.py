@@ -292,6 +292,9 @@ class Users(db.Model):
         """Requires use of Python 3"""
         return str(self.id)
 
+    def get_name(self):
+        return str(self.email)
+
     def __repr__(self):
         return '<User {0}>'.format(self.name)
 
