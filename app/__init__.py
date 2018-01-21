@@ -1,6 +1,6 @@
 from flask import Flask, redirect
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, login_user, logout_user, UserMixin
+from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
 from celery import Celery
 from flask_blogging import SQLAStorage, BloggingEngine
