@@ -11,10 +11,23 @@ from flask_login import login_required, login_user, current_user, logout_user
 from .models import Users, HomeView, UserView
 from .forms import LoginForm, EmailForm, PasswordForm
 
+from flask_blogging import SQLAStorage, BloggingEngine
+from sqlalchemy import create_engine, MetaData
+
 
 # set up user administration page
 admin = Admin(app, name='MIV tracker', index_view=HomeView())
 admin.add_view(UserView(Users, db.session))
+
+engine = create_engine(app.config["SQLALCHEMY_DATABASE_URI"])
+meta = MetaData()
+sql_storage = SQLAStorage(engine, metadata=meta)
+blog_engine = BloggingEngine(app, sql_storage)
+meta.create_all(bind=engine)
+
+@blog_engine.user_loader
+def load_user(user_id):
+    return Users.query.filter(Users.id == int(user_id)).first()
 
 
 def _count(chain):
