@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, UserMixin
 from flask_bcrypt import Bcrypt
 from celery import Celery
+from flask_blogging import SQLAStorage, BloggingEngine
+from sqlalchemy import create_engine, MetaData
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -22,9 +24,18 @@ app.config["FILEUPLOAD_PREFIX"] = "/fileupload"
 app.config["FILEUPLOAD_ALLOWED_EXTENSIONS"] = ["png", "jpg", "jpeg", "gif"]
 
 from app.models import Users
+from app import views, models
+
+engine = create_engine(app.config["SQLALCHEMY_DATABASE_URI"])
+meta = MetaData()
+sql_storage = SQLAStorage(engine, metadata=meta)
+blog_engine = BloggingEngine(app, sql_storage)
+login_manager = LoginManager(app)
+meta.create_all(bind=engine)
 
 
 @login_manager.user_loader
+@blog_engine.user_loader
 def load_user(user_id):
     return Users.query.filter(Users.id == int(user_id)).first()
 
@@ -32,9 +43,6 @@ def load_user(user_id):
 @login_manager.unauthorized_handler
 def unauthorized_callback():
     return redirect('/')
-
-
-from app import views, models
 
 
 if not app.debug:
