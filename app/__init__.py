@@ -22,12 +22,17 @@ app.config["BLOGGING_KEYWORDS"] = ["locky", "malware", "new strain"]
 app.config["FILEUPLOAD_IMG_FOLDER"] = "fileupload"
 app.config["FILEUPLOAD_PREFIX"] = "/fileupload"
 app.config["FILEUPLOAD_ALLOWED_EXTENSIONS"] = ["png", "jpg", "jpeg", "gif"]
+engine = create_engine(app.config["SQLALCHEMY_DATABASE_URI"])
+meta = MetaData()
+sql_storage = SQLAStorage(engine, metadata=meta)
+blog_engine = BloggingEngine(app, sql_storage)
+meta.create_all(bind=engine)
 
 from app.models import Users
-from app import views, models
 
 
 @login_manager.user_loader
+@blog_engine.user_loader
 def load_user(user_id):
     return Users.query.filter(Users.id == int(user_id)).first()
 
@@ -36,6 +41,8 @@ def load_user(user_id):
 def unauthorized_callback():
     return redirect('/')
 
+
+from app import views, models
 
 if not app.debug:
     import logging
