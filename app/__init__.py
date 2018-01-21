@@ -13,6 +13,8 @@ bcrypt = Bcrypt(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "users.login"
+from app import views, models
+
 app.config["BLOGGING_SITENAME"] = "MALWAREINTELVAULT"
 app.config["BLOGGING_URL_PREFIX"] = "/blog"
 app.config["BLOGGING_DISQUS_SITENAME"] = "test"
@@ -42,9 +44,6 @@ def load_user(user_id):
 @login_manager.unauthorized_handler
 def unauthorized_callback():
     return redirect('/')
-
-
-from app import views, models
 
 
 if not app.debug:
