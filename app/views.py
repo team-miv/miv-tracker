@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, request, jsonify, json, escape, url_for
 from sqlalchemy.exc import IntegrityError
-from app import app
+from app import app, login_manager
 from .forms import EventForm, IndicatorForm, NoteForm, ItypeForm, FeedConfigForm, IndicatorEditForm, MitigationForm, RegisterForm
 from feeder.logentry import ResultsDict
 from .models import Event, Indicator, Itype, Control, Level, Likelihood, Source, Status, Tlp, Note, Mitigation, db, Users
@@ -11,10 +11,25 @@ from flask_login import login_required, login_user, current_user, logout_user
 from .models import Users, HomeView, UserView
 from .forms import LoginForm, EmailForm, PasswordForm
 
+from flask_blogging import SQLAStorage, BloggingEngine
+from sqlalchemy import create_engine, MetaData
+
 
 # set up user administration page
 admin = Admin(app, name='MIV tracker', index_view=HomeView())
 admin.add_view(UserView(Users, db.session))
+
+engine = create_engine(app.config["SQLALCHEMY_DATABASE_URI"])
+meta = MetaData()
+sql_storage = SQLAStorage(engine, metadata=meta)
+blog_engine = BloggingEngine(app, sql_storage)
+login_manager = login_manager
+meta.create_all(bind=engine)
+
+
+@blog_engine.user_loader
+def load_user(user_id):
+    return Users.query.filter(Users.id == int(user_id)).first()
 
 
 def _count(chain):
