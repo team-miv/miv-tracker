@@ -5,3 +5,8 @@
 .dl-horizontal dt {
   width:auto;
 }
+
+.navbar-default .navbar-brand {
+  font-family: 'Cabin', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: white;
+}

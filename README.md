@@ -27,14 +27,11 @@ To run miv-tracker locally for testing and development purposes do the following
 - ```source venv/bin/activate```
 - ```./run.py```
 
-To run miv-tracker in a production environment run the following:
-- ```source venv/bin/activate```
-- ```pip install gunicorn```
-- ```gunicorn --bind 0.0.0.0:5000 run:app```
-- ```./tasks.py &```
+For production environments it is advised to serve miv-tracker via gunicorn behing Nginx
+acting as a front end reverse proxy. Instructions to do so can be found [here](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-16-04).
 
-*Note: An optimal production setup would serve miv-tracker via gunicorn behing Nginx
-acting as a front end reverse proxy. Instructions to do so can be found [here](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-16-04).*
+### Post-installation configuration options
+
 
 ### Versioning
 This project adheres to [Semantic Versioning](http://semver.org/).

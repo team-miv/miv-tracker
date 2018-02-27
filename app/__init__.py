@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
 from celery import Celery
+from flask_blogging import SQLAStorage, BloggingEngine
+from sqlalchemy import create_engine, MetaData
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -11,21 +13,36 @@ bcrypt = Bcrypt(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "users.login"
+app.config["BLOGGING_SITENAME"] = "MALWAREINTELVAULT"
+app.config["BLOGGING_URL_PREFIX"] = "/blog"
+app.config["BLOGGING_DISQUS_SITENAME"] = "test"
+app.config["BLOGGING_SITEURL"] = "http://localhost:5000/index"
+app.config["BLOGGING_SITENAME"] = "MALWAREINTELVAULT"
+app.config["BLOGGING_KEYWORDS"] = ["locky", "malware", "new strain"]
+app.config["FILEUPLOAD_IMG_FOLDER"] = "fileupload"
+app.config["FILEUPLOAD_PREFIX"] = "/fileupload"
+app.config["FILEUPLOAD_ALLOWED_EXTENSIONS"] = ["png", "jpg", "jpeg", "gif"]
+engine = create_engine(app.config["SQLALCHEMY_DATABASE_URI"])
+meta = MetaData()
+sql_storage = SQLAStorage(engine, metadata=meta)
+blog_engine = BloggingEngine(app, sql_storage)
+meta.create_all(bind=engine)
 
 from app.models import Users
 
 
 @login_manager.user_loader
+@blog_engine.user_loader
 def load_user(user_id):
     return Users.query.filter(Users.id == int(user_id)).first()
 
 
 @login_manager.unauthorized_handler
 def unauthorized_callback():
-    return redirect('/login')
+    return redirect('/')
+
 
 from app import views, models
-
 
 if not app.debug:
     import logging
